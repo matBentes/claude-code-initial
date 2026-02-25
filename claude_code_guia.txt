@@ -1,0 +1,932 @@
+
+╔══════════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                              ║
+║          CLAUDE CODE — GUIA COMPLETO DE CAPACIDADES E FLUXOS DE TRABALHO                     ║
+║                     Referência para Engenharia de Software                                   ║
+║                                                                                              ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 1 — O QUE É O CLAUDE CODE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Claude Code é uma CLI (Interface de Linha de Comando) de agente de IA desenvolvida pela
+  Anthropic, projetada para assistir engenheiros de software diretamente no terminal.
+  Ele lê, edita, pesquisa e executa código com consciência do contexto do projeto.
+
+  ┌───────────────────────────────────────────────────────────────────────────────────────┐
+  │                         MODELO MENTAL DO CLAUDE CODE                                  │
+  │                                                                                       │
+  │    [Desenvolvedor]  ──────────  linguagem natural  ──────────>  [Claude Code]         │
+  │                                                                        │               │
+  │                                                           ┌───────────▼────────────┐  │
+  │                                                           │   Motor de Raciocínio  │  │
+  │                                                           │   (Claude Opus 4.6)    │  │
+  │                                                           └───────────┬────────────┘  │
+  │                                                                       │               │
+  │          ┌──────────────────────────────────────────────────────────▼─────────────┐  │
+  │          │                    FERRAMENTAS DISPONÍVEIS                               │  │
+  │          │                                                                          │  │
+  │          │  [Ler Arquivos]  [Editar Arquivos]  [Buscar Código]  [Executar Bash]     │  │
+  │          │  [Criar Arquivos] [Navegar Diretórios] [Git] [Agentes Paralelos]         │  │
+  │          └──────────────────────────────────────────────────────────────────────────┘  │
+  │                                                                       │               │
+  │                                                     ┌─────────────────▼──────────┐    │
+  │                                                     │   SISTEMA DE ARQUIVOS /    │    │
+  │                                                     │   BASE DE CÓDIGO DO        │    │
+  │                                                     │   PROJETO                  │    │
+  │                                                     └────────────────────────────┘    │
+  └───────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 2 — PRINCIPAIS CAPACIDADES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────────────┐  ┌──────────────────────────────┐  ┌───────────────────────────┐
+  │   LEITURA E COMPREENSÃO      │  │   ESCRITA E MODIFICACAO       │  │   EXECUCAO E VERIFICACAO  │
+  │  DE CODIGO                   │  │   DE CODIGO                   │  │                           │
+  │                              │  │                               │  │                           │
+  │  • Lê arquivos individuais   │  │  • Cria novos arquivos        │  │  • Executa comandos bash  │
+  │  • Busca padrões com regex   │  │  • Edita trechos específicos  │  │  • Roda testes            │
+  │  • Navega estruturas de dir. │  │  • Renomeia/move arquivos     │  │  • Compila projetos       │
+  │  • Entende arquitetura       │  │  • Refatora código            │  │  • Verifica linting       │
+  │  • Correlaciona múlt. arquiv.│  │  • Escreve testes             │  │  • Analisa saídas de erro │
+  │  • Analisa dependências      │  │  • Gera documentação          │  │  • Executa scripts        │
+  └──────────────────────────────┘  └──────────────────────────────┘  └───────────────────────────┘
+
+  ┌──────────────────────────────┐  ┌──────────────────────────────┐  ┌───────────────────────────┐
+  │   CONTROLE DE VERSAO         │  │   RACIOCINIO E PLANEJAMENTO   │  │   AGENTES E PARALELISMO   │
+  │                              │  │                               │  │                           │
+  │  • git status / diff / log   │  │  • Divide tarefas complexas   │  │  • Lança sub-agentes      │
+  │  • Cria commits              │  │  • Planeja antes de executar  │  │  • Tarefas em paralelo    │
+  │  • Analisa histórico         │  │  • Explica decisões           │  │  • Pesquisa independente  │
+  │  • Cria pull requests (gh)   │  │  • Pede confirmação quando    │  │  • Agrega resultados      │
+  │  • Resolve conflitos         │  │    necessário                 │  │  • Reduz tempo de tarefa  │
+  │  • Navega branches           │  │  • Aprende com o contexto     │  │    em grandes bases       │
+  └──────────────────────────────┘  └──────────────────────────────┘  └───────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 3 — FERRAMENTAS INTERNAS (TOOLS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                           CAIXA DE FERRAMENTAS DO CLAUDE CODE                            │
+  │                                                                                          │
+  │   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+  │   │    Read     │  │    Write    │  │    Edit     │  │    Bash     │  │    Glob     │  │
+  │   │─────────────│  │─────────────│  │─────────────│  │─────────────│  │─────────────│  │
+  │   │ Lê arquivos │  │ Cria/sobre- │  │ Substitui   │  │ Executa     │  │ Busca       │  │
+  │   │ completos   │  │ screve      │  │ trechos     │  │ comandos    │  │ arquivos    │  │
+  │   │ ou parciais │  │ arquivos    │  │ específicos │  │ no terminal │  │ por padrão  │  │
+  │   └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  │
+  │                                                                                          │
+  │   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  │
+  │   │    Grep     │  │ NotebookEdit│  │  WebFetch   │  │  WebSearch  │  │    Task     │  │
+  │   │─────────────│  │─────────────│  │─────────────│  │─────────────│  │─────────────│  │
+  │   │ Busca       │  │ Edita       │  │ Acessa URLs │  │ Pesquisa    │  │ Lança       │  │
+  │   │ conteúdo    │  │ notebooks   │  │ e extrai    │  │ na web      │  │ sub-agentes │  │
+  │   │ com regex   │  │ Jupyter     │  │ conteúdo    │  │ (atual)     │  │ paralelos   │  │
+  │   └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  │
+  │                                                                                          │
+  │   ┌─────────────┐  ┌──────────────────────────────────────────────────────────────────┐ │
+  │   │  TodoWrite  │  │                        MCP (Model Context Protocol)               │ │
+  │   │─────────────│  │──────────────────────────────────────────────────────────────────│ │
+  │   │ Gerencia    │  │  Protocolo aberto para conectar Claude Code a ferramentas         │ │
+  │   │ lista de    │  │  externas: bancos de dados, APIs, serviços de nuvem, IDEs,        │ │
+  │   │ tarefas     │  │  sistemas de monitoramento, e qualquer servidor MCP customizado   │ │
+  │   └─────────────┘  └──────────────────────────────────────────────────────────────────┘ │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 3.1 — SKILLS (Comandos Customizados Reutilizáveis)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Skills são prompts reutilizáveis invocados via /nome-da-skill diretamente no chat.
+  Funcionam como "macros" ou "atalhos de tarefa" configurados pelo usuário ou pelo sistema.
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                              COMO SKILLS FUNCIONAM                                       │
+  │                                                                                          │
+  │   Desenvolvedor digita:   /commit                                                        │
+  │         │                                                                                │
+  │         ▼                                                                                │
+  │   Claude Code expande o atalho para o prompt completo associado à skill                  │
+  │         │                                                                                │
+  │         ▼                                                                                │
+  │   Claude executa a tarefa como se o prompt completo tivesse sido escrito                 │
+  │                                                                                          │
+  │   SKILLS NATIVAS (exemplos do sistema):                                                  │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │                                                                                    │ │
+  │   │   /commit            →  Gera commit semântico analisando as mudanças staged        │ │
+  │   │   /review-pr [num]   →  Revisa um Pull Request do GitHub pelo número               │ │
+  │   │   /keybindings-help  →  Ajuda a configurar atalhos de teclado customizados         │ │
+  │   │   /fast              →  Alterna o modo de output mais rápido (toggle)              │ │
+  │   │   /help              →  Exibe ajuda geral do Claude Code                           │ │
+  │   │   /clear             →  Limpa o contexto da sessão atual                           │ │
+  │   │                                                                                    │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                                          │
+  │   SKILLS CUSTOMIZADAS (criadas pelo usuário):                                            │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │                                                                                    │ │
+  │   │   Localização:  ~/.claude/skills/  (global)                                        │ │
+  │   │                 /projeto/.claude/skills/  (por projeto)                            │ │
+  │   │                                                                                    │ │
+  │   │   Cada skill = um arquivo de prompt com instruções detalhadas                      │ │
+  │   │                                                                                    │ │
+  │   │   Exemplos de skills customizadas úteis:                                           │ │
+  │   │   /deploy-staging   →  Sequência completa de build + testes + deploy               │ │
+  │   │   /audit-security   →  Revisão de segurança OWASP no código modificado            │ │
+  │   │   /gen-tests        →  Gera testes para o arquivo aberto no contexto              │ │
+  │   │   /changelog        →  Gera CHANGELOG com base no histórico git                   │ │
+  │   │   /onboard          →  Explica o projeto para um novo desenvolvedor               │ │
+  │   │                                                                                    │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                                          │
+  │   VANTAGENS DAS SKILLS:                                                                  │
+  │   • Padronizam fluxos repetitivos do time                                                │
+  │   • Eliminam prompts longos reescritos manualmente                                       │
+  │   • Podem ser versionadas junto ao projeto (em .claude/skills/)                          │
+  │   • Permitem onboarding mais rápido de novos membros                                     │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 3.2 — SUBAGENTS (Agentes Especializados)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Subagents são instâncias especializadas de Claude lançadas via Task tool para executar
+  trabalho independente em paralelo, protegendo o contexto principal e reduzindo latência.
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                         TIPOS DE SUBAGENTS DISPONÍVEIS                                   │
+  │                                                                                          │
+  │  ┌──────────────┬──────────────────────────────────────────────────────────────────────┐ │
+  │  │   TIPO        │  DESCRIÇÃO E QUANDO USAR                                            │ │
+  │  ├──────────────┼──────────────────────────────────────────────────────────────────────┤ │
+  │  │  Bash         │  Especialista em comandos de terminal: git, npm, docker, scripts.   │ │
+  │  │               │  Use para operações shell que não precisam ler/editar arquivos.     │ │
+  │  ├──────────────┼──────────────────────────────────────────────────────────────────────┤ │
+  │  │  Explore      │  Exploração rápida de codebases. Busca arquivos por padrão,         │ │
+  │  │               │  pesquisa keywords, responde perguntas sobre estrutura do projeto.  │ │
+  │  │               │  Níveis: quick / medium / very thorough.                            │ │
+  │  ├──────────────┼──────────────────────────────────────────────────────────────────────┤ │
+  │  │  Plan         │  Arquiteto de software. Projeta planos de implementação,            │ │
+  │  │               │  identifica arquivos críticos, avalia trade-offs arquiteturais.     │ │
+  │  │               │  Retorna plano passo-a-passo para aprovação antes de codar.         │ │
+  │  ├──────────────┼──────────────────────────────────────────────────────────────────────┤ │
+  │  │  general-     │  Agente de propósito geral para pesquisa complexa, multi-step,      │ │
+  │  │  purpose      │  buscas amplas no codebase ou quando simples queries não bastam.    │ │
+  │  ├──────────────┼──────────────────────────────────────────────────────────────────────┤ │
+  │  │  statusline-  │  Configura a status line do Claude Code no terminal do usuário.     │ │
+  │  │  setup        │  Uso específico para customização de interface.                     │ │
+  │  └──────────────┴──────────────────────────────────────────────────────────────────────┘ │
+  │                                                                                          │
+  │   COMO SUBAGENTS FUNCIONAM NA PRÁTICA:                                                   │
+  │                                                                                          │
+  │      Claude Principal (contexto da conversa)                                             │
+  │              │                                                                           │
+  │              │  detecta tarefa complexa ou paralelizável                                 │
+  │              │                                                                           │
+  │     ┌────────┴────────┬────────────────────┐                                            │
+  │     │                 │                    │                                            │
+  │     ▼                 ▼                    ▼                                            │
+  │  [Subagent 1]     [Subagent 2]         [Subagent 3]                                     │
+  │  Explore:         Bash:                Explore:                                         │
+  │  mapeia módulo A  roda testes          mapeia módulo B                                  │
+  │     │                 │                    │                                            │
+  │     └────────┬────────┴────────────────────┘                                            │
+  │              │                                                                           │
+  │              ▼                                                                           │
+  │      Claude Principal agrega resultados e continua o trabalho                            │
+  │                                                                                          │
+  │   VANTAGENS DOS SUBAGENTS:                                                               │
+  │   • Paralelismo real — múltiplas tarefas simultâneas                                     │
+  │   • Proteção do contexto principal (subagents têm seu próprio contexto)                  │
+  │   • Especialização — cada tipo tem ferramentas otimizadas para sua função                │
+  │   • Podem rodar em background (run_in_background) sem bloquear o fluxo                  │
+  │   • Retomáveis — um subagent pode ser retomado via agent ID (resume)                    │
+  │                                                                                          │
+  │   QUANDO USAR SUBAGENTS:                                                                  │
+  │   [✓]  Busca ampla no codebase (use Explore, não faça você mesmo)                       │
+  │   [✓]  Tarefas independentes que podem rodar em paralelo                                 │
+  │   [✓]  Pesquisa que consumiria muito contexto da conversa principal                      │
+  │   [✓]  Validação de build/testes enquanto você continua trabalhando                     │
+  │   [✗]  Tarefas simples de 1-2 passos (overhead desnecessário)                           │
+  │   [✗]  Quando o resultado de um agente depende do outro (use sequencial)                │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 3.3 — HOOKS (Automações por Evento)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Hooks são comandos shell configurados pelo usuário que disparam automaticamente
+  em resposta a eventos do Claude Code (ex: antes de enviar um prompt, após uma ação).
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                              SISTEMA DE HOOKS                                            │
+  │                                                                                          │
+  │   EVENTO                    →  HOOK EXECUTA  →  RESULTADO                                │
+  │   ──────────────────────────────────────────────────────────────────────────────────     │
+  │   user-prompt-submit        →  script.sh     →  Claude recebe feedback do hook           │
+  │   (antes do prompt ser enviado)                  e pode ajustar comportamento            │
+  │                                                                                          │
+  │   Exemplos de uso de hooks:                                                              │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │                                                                                    │ │
+  │   │   • Validar que testes passam antes de qualquer commit                            │ │
+  │   │   • Injetar contexto automático (ex: branch atual, ticket do Jira)                │ │
+  │   │   • Bloquear ações em horários ou branches específicos                            │ │
+  │   │   • Logar todas as interações para auditoria                                      │ │
+  │   │   • Notificar Slack/Teams quando Claude faz deploy                                │ │
+  │   │   • Executar linter automaticamente antes de edições                              │ │
+  │   │                                                                                    │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                                          │
+  │   Configuração: Settings do Claude Code → Hooks                                          │
+  │   O Claude trata feedback de hooks como mensagens do próprio usuário.                    │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 3.4 — PLAN MODE e PERMISSOES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                                                                          │
+  │   PLAN MODE (Modo de Planejamento)                                                       │
+  │   ─────────────────────────────────────────────────────────────────────────────────     │
+  │                                                                                          │
+  │   Claude entra em Plan Mode antes de implementar tarefas complexas ou ambíguas.          │
+  │   Explora o codebase, desenha a abordagem e apresenta para aprovação do dev              │
+  │   ANTES de escrever qualquer linha de código.                                            │
+  │                                                                                          │
+  │        Tarefa recebida                                                                   │
+  │              │                                                                           │
+  │              ▼                                                                           │
+  │        [PLAN MODE]  ── explora codebase ──> escreve plano no arquivo                    │
+  │              │                                                                           │
+  │              ▼                                                                           │
+  │        Apresenta plano ao usuário ── usuário aprova ou pede ajustes                      │
+  │              │                                                                           │
+  │              ▼                                                                           │
+  │        [IMPLEMENTAÇÃO]  ── executa o plano aprovado                                      │
+  │                                                                                          │
+  │   Quando Plan Mode é ativado automaticamente:                                            │
+  │   • Novas features com múltiplas abordagens válidas                                      │
+  │   • Mudanças que afetam mais de 2-3 arquivos                                             │
+  │   • Decisões arquiteturais (padrão, tecnologia, estrutura)                               │
+  │   • Quando requisitos são ambíguos                                                       │
+  │                                                                                          │
+  │   SISTEMA DE PERMISSOES                                                                  │
+  │   ─────────────────────────────────────────────────────────────────────────────────     │
+  │                                                                                          │
+  │   Claude opera em modos de permissão configuráveis pelo usuário:                         │
+  │                                                                                          │
+  │   ┌──────────────────────────┬───────────────────────────────────────────────────────┐  │
+  │   │  AÇÃO                    │  COMPORTAMENTO PADRÃO                                 │  │
+  │   ├──────────────────────────┼───────────────────────────────────────────────────────┤  │
+  │   │  Ler arquivos            │  Automático (sem confirmação)                         │  │
+  │   │  Editar arquivos locais  │  Automático (sem confirmação)                         │  │
+  │   │  Executar bash local     │  Pede confirmação (dependendo do modo)                │  │
+  │   │  git push / PR           │  Pede confirmação explícita                           │  │
+  │   │  Ações destrutivas       │  Sempre pede confirmação                              │  │
+  │   │  Ações em sistemas ext.  │  Sempre pede confirmação                              │  │
+  │   └──────────────────────────┴───────────────────────────────────────────────────────┘  │
+  │                                                                                          │
+  │   KEYBINDINGS (Atalhos de Teclado Customizados)                                          │
+  │   ─────────────────────────────────────────────────────────────────────────────────     │
+  │                                                                                          │
+  │   Configurados em:  ~/.claude/keybindings.json                                           │
+  │   Skill de ajuda:   /keybindings-help                                                    │
+  │                                                                                          │
+  │   Suporta:                                                                               │
+  │   • Atalhos simples:  ctrl+s, ctrl+enter                                                 │
+  │   • Chord bindings:   ctrl+k → ctrl+p  (sequência de teclas)                            │
+  │   • Rebind de ações existentes                                                           │
+  │   • Atalhos customizados para submeter prompts específicos                               │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 4 — SISTEMA DE MEMORIA E CONTEXTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                          CAMADAS DE MEMORIA DO CLAUDE CODE                               │
+  │                                                                                          │
+  │                                                                                          │
+  │   NIVEL 1 — Contexto da Conversa (Session)                                               │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │  Memória temporária dentro da sessão atual. Claude lembra de tudo que foi dito    │ │
+  │   │  ou lido durante a conversa. Reinicia ao fechar a sessão.                         │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  │                                    |                                                     │
+  │                                    ▼                                                     │
+  │   NIVEL 2 — Arquivos CLAUDE.md (Memória Persistente)                                     │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │                                                                                    │ │
+  │   │   ~/.claude/CLAUDE.md          →  Configurações globais do usuário                │ │
+  │   │   /projeto/CLAUDE.md           →  Contexto do projeto (raiz)                      │ │
+  │   │   /projeto/subdir/CLAUDE.md    →  Contexto de subdiretórios específicos           │ │
+  │   │                                                                                    │ │
+  │   │   Conteúdo recomendado no CLAUDE.md:                                               │ │
+  │   │   • Arquitetura e decisões de design do projeto                                   │ │
+  │   │   • Comandos de build, teste e deploy                                              │ │
+  │   │   • Convenções de código e estilo                                                  │ │
+  │   │   • Contexto de negócio relevante                                                  │ │
+  │   │   • Restrições e regras do time                                                    │ │
+  │   │   • Referências a documentação externa                                             │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  │                                    |                                                     │
+  │                                    ▼                                                     │
+  │   NIVEL 3 — Leitura Ativa de Arquivos (Contexto Sob Demanda)                             │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │  Claude lê arquivos conforme necessário durante a tarefa: código-fonte, configs,  │ │
+  │   │  testes, documentação, schemas, etc. O contexto cresce dinamicamente.             │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 5 — FLUXO DE TRABALHO: NOVO PROJETO (do zero)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                                                                        │
+  │   PASSO 1 — Criar diretório e iniciar Claude Code                                      │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │     $ mkdir meu-projeto && cd meu-projeto                                              │
+  │     $ claude                                                                           │
+  │                                                                                        │
+  │   PASSO 2 — Descrever o projeto em linguagem natural                                   │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │     > "Crie uma API REST em Node.js com Express para gerenciar tarefas.                │
+  │        Use TypeScript, inclua autenticação JWT, testes com Jest,                       │
+  │        e estrutura de pastas seguindo Clean Architecture."                             │
+  │                                                                                        │
+  │   PASSO 3 — Claude cria a estrutura do projeto                                         │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │     meu-projeto/                                                                       │
+  │     ├── src/                                                                           │
+  │     │   ├── domain/          (entidades e regras de negócio)                           │
+  │     │   ├── application/     (casos de uso)                                            │
+  │     │   ├── infrastructure/  (banco, repositórios)                                     │
+  │     │   └── interfaces/      (controllers, rotas)                                      │
+  │     ├── tests/                                                                         │
+  │     ├── CLAUDE.md            <- Claude cria automaticamente                            │
+  │     ├── package.json                                                                   │
+  │     ├── tsconfig.json                                                                  │
+  │     └── README.md                                                                      │
+  │                                                                                        │
+  │   PASSO 4 — Iterar com Claude em ciclos curtos                                         │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │         ┌─────────────┐                                                                │
+  │         │  Descrever  │                                                                │
+  │         │  funcional. │                                                                │
+  │         └──────┬──────┘                                                                │
+  │                │                                                                       │
+  │                ▼                                                                       │
+  │         ┌─────────────┐      ┌────────────────┐      ┌──────────────┐                 │
+  │         │   Claude    │ ───> │ Claude executa │ ───> │  Resultado   │                 │
+  │         │  planeja    │      │   e verifica   │      │  revisado    │                 │
+  │         └─────────────┘      └────────────────┘      └──────┬───────┘                 │
+  │                                                             │                         │
+  │                              ┌──────────────────────────────┘                         │
+  │                              │                                                         │
+  │                   OK?  ──── NÃO ──> "Ajuste X, Y e Z"  ───> (repete ciclo)            │
+  │                    │                                                                   │
+  │                   SIM ──> Próxima funcionalidade                                       │
+  │                                                                                        │
+  │   PASSO 5 — Boas práticas durante o desenvolvimento                                    │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │     > "Execute os testes e corrija qualquer falha"                                     │
+  │     > "Faça lint do código e resolva os erros de estilo"                               │
+  │     > "Crie um commit semântico com as mudanças desta feature"                         │
+  │     > "Gere testes unitários para o serviço UserService"                               │
+  │     > "Adicione tratamento de erros adequado em todas as rotas"                        │
+  │                                                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 6 — FLUXO DE TRABALHO: PROJETO EXISTENTE (sem Claude Code)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                                                                        │
+  │   FASE 1 — Onboarding (Integração ao Projeto Existente)                                │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │     $ cd projeto-existente                                                             │
+  │     $ claude                                                                           │
+  │                                                                                        │
+  │     > "Explore a estrutura do projeto e me dê um resumo da arquitetura,               │
+  │        tecnologias usadas, e como rodar localmente."                                   │
+  │                                                                                        │
+  │     Claude irá automaticamente:                                                        │
+  │       [1] Ler o README e documentação existente                                        │
+  │       [2] Explorar package.json / Makefile / pyproject.toml / etc.                    │
+  │       [3] Mapear estrutura de diretórios                                               │
+  │       [4] Analisar principais módulos e dependências                                   │
+  │       [5] Gerar resumo compreensivo para o desenvolvedor                               │
+  │                                                                                        │
+  │   FASE 2 — Criar CLAUDE.md para o Projeto                                              │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │     > "Crie um arquivo CLAUDE.md com as informações mais relevantes                   │
+  │        do projeto para servir como contexto em futuras sessões."                       │
+  │                                                                                        │
+  │     Estrutura recomendada do CLAUDE.md:                                                │
+  │     ┌──────────────────────────────────────────────────────────────────────────────┐   │
+  │     │  # CLAUDE.md                                                                 │   │
+  │     │                                                                              │   │
+  │     │  ## Visão Geral                                                              │   │
+  │     │  [Descrição do sistema e propósito]                                          │   │
+  │     │                                                                              │   │
+  │     │  ## Comandos Essenciais                                                      │   │
+  │     │  - Build: `npm run build`                                                    │   │
+  │     │  - Testes: `npm test`                                                        │   │
+  │     │  - Dev: `npm run dev`                                                        │   │
+  │     │                                                                              │   │
+  │     │  ## Arquitetura                                                              │   │
+  │     │  [Diagrama textual ou descrição da arquitetura]                              │   │
+  │     │                                                                              │   │
+  │     │  ## Convenções                                                               │   │
+  │     │  - Estilo de código: [padrões do projeto]                                    │   │
+  │     │  - Commits: Conventional Commits (feat/fix/chore...)                         │   │
+  │     │  - Branches: feature/*, hotfix/*, release/*                                  │   │
+  │     │                                                                              │   │
+  │     │  ## Contexto de Negócio                                                      │   │
+  │     │  [Regras de domínio importantes]                                             │   │
+  │     └──────────────────────────────────────────────────────────────────────────────┘   │
+  │                                                                                        │
+  │   FASE 3 — Fluxo de Trabalho para Novas Features                                       │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │    TAREFA RECEBIDA                                                                     │
+  │         │                                                                              │
+  │         ▼                                                                              │
+  │    ┌────────────────────────────────────────────────────────────────────────────────┐  │
+  │    │  ENTENDIMENTO  →  "Mostre o código atual do módulo X e explique como funciona" │  │
+  │    └─────────────────────────────────────────────────────────────────────────────┬──┘  │
+  │                                                                                   │    │
+  │                                                                                   ▼    │
+  │    ┌────────────────────────────────────────────────────────────────────────────────┐  │
+  │    │  PLANEJAMENTO  →  "Como você implementaria Y sem quebrar X?"                  │  │
+  │    └─────────────────────────────────────────────────────────────────────────────┬──┘  │
+  │                                                                                   │    │
+  │                                                                                   ▼    │
+  │    ┌────────────────────────────────────────────────────────────────────────────────┐  │
+  │    │  IMPLEMENTAÇÃO →  "Implemente conforme planejado, com testes"                 │  │
+  │    └─────────────────────────────────────────────────────────────────────────────┬──┘  │
+  │                                                                                   │    │
+  │                                                                                   ▼    │
+  │    ┌────────────────────────────────────────────────────────────────────────────────┐  │
+  │    │  VERIFICAÇÃO   →  "Rode os testes. Existe alguma regressão?"                  │  │
+  │    └─────────────────────────────────────────────────────────────────────────────┬──┘  │
+  │                                                                                   │    │
+  │                                                                                   ▼    │
+  │    ┌────────────────────────────────────────────────────────────────────────────────┐  │
+  │    │  COMMIT        →  "Crie um commit semântico descrevendo as mudanças"          │  │
+  │    └────────────────────────────────────────────────────────────────────────────────┘  │
+  │                                                                                        │
+  │   FASE 4 — Fluxo para Correção de Bugs                                                 │
+  │   ─────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                        │
+  │     BUG REPORTADO                                                                      │
+  │          │                                                                             │
+  │          ▼                                                                             │
+  │     > "Temos este erro: [stack trace]. Encontre a causa raiz."                         │
+  │          │                                                                             │
+  │          ├──> Claude analisa logs, rastreia chamadas, lê código relacionado            │
+  │          │                                                                             │
+  │          ▼                                                                             │
+  │     > "Qual é o impacto dessa correção? Pode afetar outras partes?"                   │
+  │          │                                                                             │
+  │          ├──> Claude mapeia dependências e pontos de impacto                           │
+  │          │                                                                             │
+  │          ▼                                                                             │
+  │     > "Corrija o bug e adicione um teste de regressão."                                │
+  │          │                                                                             │
+  │          └──> Claude aplica fix mínimo e escreve teste que falha antes, passa depois   │
+  │                                                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 7 — BOAS PRATICAS DE ENGENHARIA DE SOFTWARE COM CLAUDE CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                                                                          │
+  │   1. SEJA ESPECIFICO NOS PEDIDOS                                                         │
+  │   ──────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                          │
+  │    FRACO  : "Melhore o código"                                                           │
+  │    FORTE  : "Refatore a função processPayment() em src/services/payment.ts para          │
+  │              separar a validação do processamento, adicione tratamento de erro           │
+  │              adequado e escreva testes unitários cobrindo os casos de falha."            │
+  │                                                                                          │
+  │                                                                                          │
+  │   2. USE CICLOS CURTOS DE FEEDBACK                                                       │
+  │   ──────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                          │
+  │    - Peça pequenas mudanças verificáveis                                                 │
+  │    - Revise antes de pedir mais                                                          │
+  │    - Execute testes após cada mudança significativa                                      │
+  │    - Não deixe erros acumularem sem resolver                                             │
+  │                                                                                          │
+  │                                                                                          │
+  │   3. MANTENHA CLAUDE.md ATUALIZADO                                                       │
+  │   ──────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                          │
+  │    - Adicione novas convenções adotadas pelo time                                        │
+  │    - Documente decisões de arquitetura (Architecture Decision Records — ADRs)            │
+  │    - Mantenha comandos de build/test/deploy sempre atualizados                           │
+  │    - Inclua contexto que economiza tempo de explicação repetitiva                        │
+  │                                                                                          │
+  │                                                                                          │
+  │   4. CONTROLE DE VERSAO RESPONSAVEL                                                      │
+  │   ──────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                          │
+  │    - Sempre revise diffs antes de aprovar commits                                        │
+  │    - Use commits semânticos (feat, fix, refactor, test, docs, chore)                    │
+  │    - Nunca use --force em branches protegidas                                            │
+  │    - Não commite arquivos sensíveis (.env, credenciais)                                  │
+  │    - Prefira commits atômicos (uma mudança lógica por commit)                            │
+  │                                                                                          │
+  │                                                                                          │
+  │   5. TESTES COMO CIDADAOS DE PRIMEIRA CLASSE                                             │
+  │   ──────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                          │
+  │    > "Antes de implementar, escreva os testes que devem passar"   (TDD)                 │
+  │    > "Garanta cobertura de testes acima de 80% neste módulo"                            │
+  │    > "Adicione testes de integração para o fluxo de autenticação"                       │
+  │    > "Crie testes de regressão para o bug que acabamos de corrigir"                     │
+  │                                                                                          │
+  │                                                                                          │
+  │   6. REVISAO DE CODIGO ASSISTIDA                                                         │
+  │   ──────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                          │
+  │    > "Revise este PR como um engenheiro sênior focando em:"                              │
+  │      - Segurança (injeção SQL, XSS, CSRF, exposição de dados)                           │
+  │      - Performance (N+1 queries, memory leaks, loops desnecessários)                    │
+  │      - Manutenibilidade (nomes, responsabilidade única, duplicação)                     │
+  │      - Tratamento de erros e casos de borda                                             │
+  │                                                                                          │
+  │                                                                                          │
+  │   7. DOCUMENTACAO VIVA                                                                   │
+  │   ──────────────────────────────────────────────────────────────────────────────────── │
+  │                                                                                          │
+  │    > "Gere documentação JSDoc/docstring para todas as funções públicas deste arquivo"   │
+  │    > "Atualize o README com as novas funcionalidades adicionadas"                       │
+  │    > "Crie um diagrama de sequência em texto para o fluxo de autenticação"              │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 8 — MODOS DE OPERACAO DO CLAUDE CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                                                                          │
+  │   MODO INTERATIVO (padrão)                    MODO NAO INTERATIVO (automação)            │
+  │   ────────────────────────────                ──────────────────────────────────         │
+  │   $ claude                                    $ claude -p "tarefa" --output-format json  │
+  │                                               $ claude -p "tarefa" < input.txt           │
+  │   • Conversa contínua                         • Para pipelines CI/CD                     │
+  │   • Ideal para exploração                     • Para scripts de automação                │
+  │   • Feedback imediato                         • Para integração com outras tools          │
+  │   • Correções em tempo real                   • Processamento em lote                    │
+  │                                                                                          │
+  │                                                                                          │
+  │   MODO FAST (respostas aceleradas)            MODO AGENTE (tarefas longas)               │
+  │   ────────────────────────────────            ───────────────────────────────            │
+  │   /fast  (toggle dentro da sessão)            Ativado automaticamente quando             │
+  │                                               Claude detecta tarefas complexas           │
+  │   • Mesmo modelo (Claude Opus 4.6)            que requerem múltiplos passos              │
+  │   • Output mais rápido                                                                   │
+  │   • Útil para iterações rápidas               • Claude cria sub-tarefas                 │
+  │                                               • Usa Task tool para paralelismo           │
+  │                                               • Agrega resultados ao final               │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 9 — CASOS DE USO PRATICOS POR CENARIO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                                                                          │
+  │   ONBOARDING EM PROJETO LEGADO                                                           │
+  │   > "Este projeto tem 5 anos. Me explique a arquitetura geral,                           │
+  │      identifique os módulos mais críticos e me mostre como rodar localmente."            │
+  │                                                                                          │
+  │   REFATORACAO EM ESCALA                                                                  │
+  │   > "Temos 47 arquivos usando a API antiga de autenticação. Migre todos para             │
+  │      a nova API v2, mantendo compatibilidade retroativa e atualizando os testes."        │
+  │                                                                                          │
+  │   INVESTIGACAO DE PERFORMANCE                                                            │
+  │   > "Nossa API de busca está demorando 3s. Analise as queries, o código                  │
+  │      do controller e os índices do banco para identificar o gargalo."                   │
+  │                                                                                          │
+  │   MIGRACAO DE TECNOLOGIA                                                                 │
+  │   > "Precisamos migrar de JavaScript para TypeScript. Crie um plano de                  │
+  │      migração gradual, comece pelos módulos de menor risco e adicione tipos."            │
+  │                                                                                          │
+  │   AUDITORIA DE SEGURANCA                                                                 │
+  │   > "Revise todo o código de autenticação e autorização buscando                        │
+  │      vulnerabilidades OWASP Top 10. Reporte e corrija os problemas encontrados."         │
+  │                                                                                          │
+  │   GERACAO DE TESTES RETROATIVOS                                                          │
+  │   > "Este módulo não tem testes. Analise o comportamento do código e                    │
+  │      gere testes unitários cobrindo os principais fluxos e casos de borda."             │
+  │                                                                                          │
+  │   DOCUMENTACAO TECNICA                                                                   │
+  │   > "Gere um documento de arquitetura descrevendo os componentes,                       │
+  │      integrações, fluxos de dados e decisões de design deste sistema."                  │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 10 — SEGURANCA E LIMITES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                                                                          │
+  │   O QUE CLAUDE CODE NAO FARA (por padrão):                                               │
+  │                                                                                          │
+  │   [X]  git push --force em main/master sem aviso explícito                               │
+  │   [X]  Commitar arquivos .env ou credenciais                                             │
+  │   [X]  Ignorar hooks de pre-commit (--no-verify)                                         │
+  │   [X]  Amend commits anteriores sem solicitação explícita                                │
+  │   [X]  Executar comandos destrutivos sem confirmação                                     │
+  │   [X]  Criar arquivos de documentação não solicitados                                    │
+  │                                                                                          │
+  │   PRINCIPIO DO MENOR PRIVILEGIO:                                                         │
+  │   Claude Code age apenas no que é necessário para a tarefa, prefere editar               │
+  │   arquivos existentes a criar novos, e sempre explica o que está fazendo.                │
+  │                                                                                          │
+  │   TRANSPARENCIA:                                                                         │
+  │   Todas as ferramentas utilizadas são visíveis ao usuário. O desenvolvedor               │
+  │   mantém controle total e pode revisar cada ação antes de aprovação.                     │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 11 — VISAO GERAL: ECOSISTEMA CLAUDE CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────┐
+  │                                                                                        │
+  │                              DESENVOLVEDOR                                             │
+  │                                   │                                                   │
+  │                                   │ linguagem natural                                 │
+  │                                   ▼                                                   │
+  │                        ┌─────────────────────┐                                        │
+  │                        │    CLAUDE CODE CLI   │                                        │
+  │                        │  (claude no terminal)│                                        │
+  │                        └──────────┬──────────┘                                        │
+  │                                   │                                                   │
+  │          ┌────────────────────────┼────────────────────────┐                          │
+  │          │                        │                        │                          │
+  │          ▼                        ▼                        ▼                          │
+  │   ┌─────────────┐       ┌─────────────────┐       ┌──────────────┐                   │
+  │   │  FERRAMENT. │       │   MEMORIA E     │       │   AGENTES    │                   │
+  │   │  NATIVAS    │       │   CONTEXTO      │       │   PARALELOS  │                   │
+  │   │             │       │                 │       │              │                   │
+  │   │ Read/Write  │       │ CLAUDE.md       │       │ Task tool    │                   │
+  │   │ Edit/Glob   │       │ Session memory  │       │ Sub-agentes  │                   │
+  │   │ Bash/Grep   │       │ File reading    │       │ Paralelismo  │                   │
+  │   └──────┬──────┘       └────────┬────────┘       └──────┬───────┘                   │
+  │          │                       │                       │                           │
+  │          └───────────────────────┼───────────────────────┘                           │
+  │                                  │                                                   │
+  │                                  ▼                                                   │
+  │                    ┌─────────────────────────┐                                       │
+  │                    │  MODEL CONTEXT PROTOCOL  │                                       │
+  │                    │         (MCP)            │                                       │
+  │                    └────────────┬────────────┘                                       │
+  │                                 │                                                    │
+  │          ┌─────��────────────────┼──────────────────────┐                             │
+  │          │                      │                      │                             │
+  │          ▼                      ▼                      ▼                             │
+  │   ┌─────────────┐      ┌──────────────┐      ┌──────────────┐                        │
+  │   │  Bancos de  │      │  APIs e      │      │  Ferramentas │                        │
+  │   │  Dados      │      │  Servicos    │      │  de DevOps   │                        │
+  │   │  externos   │      │  externos    │      │  e Cloud     │                        │
+  │   └─────────────┘      └──────────────┘      └──────────────┘                        │
+  │                                                                                        │
+  └────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 12 — AGENTIC LOOPS (Loops Autônomos de Execução)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Um agentic loop é o ciclo interno de raciocínio e ação que Claude executa autonomamente
+  para completar tarefas complexas sem intervenção humana a cada passo.
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                          COMO FUNCIONA UM AGENTIC LOOP                                   │
+  │                                                                                          │
+  │                                                                                          │
+  │   ┌──────────────┐                                                                       │
+  │   │   OBJETIVO   │  ← recebido do desenvolvedor                                          │
+  │   └──────┬───────┘                                                                       │
+  │          │                                                                               │
+  │          ▼                                                                               │
+  │   ┌──────────────────────────────────────────────────────────────────┐                  │
+  │   │                      LOOP AUTÔNOMO                               │                  │
+  │   │                                                                  │                  │
+  │   │   ┌─────────────┐    ┌──────────────┐    ┌────────────────────┐  │                  │
+  │   │   │  RACIOCINAR │ →  │  USAR TOOL   │ →  │  OBSERVAR          │  │                  │
+  │   │   │             │    │              │    │  RESULTADO         │  │                  │
+  │   │   │  "O que     │    │  Read, Bash, │    │  "O resultado      │  │                  │
+  │   │   │   preciso   │    │  Edit, Grep, │    │   mudou o plano?"  │  │                  │
+  │   │   │   fazer?"   │    │  Task...     │    │                    │  │                  │
+  │   │   └─────────────┘    └──────────────┘    └─────────┬──────────┘  │                  │
+  │   │          ▲                                         │             │                  │
+  │   │          └─────────────── repete ─────────────────┘             │                  │
+  │   │                                                                  │                  │
+  │   │                    até: objetivo concluído                       │                  │
+  │   │                      ou: limite de turns atingido               │                  │
+  │   │                      ou: Claude pede confirmação                │                  │
+  │   └──────────────────────────────────────────────────────────────────┘                  │
+  │          │                                                                               │
+  │          ▼                                                                               │
+  │   ┌──────────────┐                                                                       │
+  │   │  RESULTADO   │  → entregue ao desenvolvedor                                          │
+  │   └──────────────┘                                                                       │
+  │                                                                                          │
+  │   CARACTERÍSTICAS DO AGENTIC LOOP:                                                       │
+  │   • Claude decide sozinho quais tools usar e em que ordem                                │
+  │   • Cada resultado de tool alimenta o próximo raciocínio                                 │
+  │   • Claude para e pergunta ao humano quando encontra ambiguidade crítica                 │
+  │   • Prefer ações reversíveis; pede confirmação para destrutivas                          │
+  │   • Subagents rodam seus próprios loops internos em paralelo                             │
+  │                                                                                          │
+  │   BOAS PRÁTICAS PARA AGENTIC LOOPS:                                                      │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │                                                                                    │ │
+  │   │   [✓]  Dê objetivos claros e critérios de conclusão                               │ │
+  │   │   [✓]  Use CLAUDE.md para reduzir perguntas desnecessárias no loop               │ │
+  │   │   [✓]  Para tarefas longas, use run_in_background + verifique depois              │ │
+  │   │   [✓]  Defina "Definition of Done" explícito no prompt                            │ │
+  │   │   [✗]  Não deixe loops muito abertos sem critério de parada                       │ │
+  │   │   [✗]  Não use para tarefas simples — overhead desnecessário                      │ │
+  │   │                                                                                    │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                                          │
+  │   EXEMPLO REAL — Loop para "Migrar autenticação para JWT":                               │
+  │                                                                                          │
+  │   Turn 1: Grep → encontra todos os arquivos com auth antiga                              │
+  │   Turn 2: Read → lê cada arquivo para entender o padrão                                 │
+  │   Turn 3: Plan → desenha estratégia de migração                                         │
+  │   Turn 4: Edit → aplica mudanças em auth/middleware.ts                                  │
+  │   Turn 5: Bash → roda testes; detecta falha                                             │
+  │   Turn 6: Read → lê o erro, identifica causa                                            │
+  │   Turn 7: Edit → corrige o problema                                                     │
+  │   Turn 8: Bash → roda testes novamente; passa                                           │
+  │   Turn 9: Task → lança subagent para verificar outros módulos                           │
+  │   Turn 10: Bash → cria commit semântico                                                 │
+  │   → DONE: objetivo concluído, resultado entregue                                        │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ SEÇÃO 13 — PRD (Product Requirements Document) COM CLAUDE CODE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Um PRD é o documento que define O QUE será construído, PARA QUEM, POR QUÊ e com quais
+  critérios de sucesso — antes de qualquer linha de código.
+  Com Claude Code, o PRD torna-se o "contrato" que guia todo o desenvolvimento.
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+  │                    PRD + CLAUDE CODE: FLUXO COMPLETO                                     │
+  │                                                                                          │
+  │   FASE 1 — CRIAR O PRD                                                                   │
+  │   ─────────────────────────────────────────────────────────────────────────────────     │
+  │                                                                                          │
+  │   > "Com base nesta ideia [descreva], ajude-me a criar um PRD completo                  │
+  │      cobrindo: visão geral, usuários-alvo, problemas resolvidos,                        │
+  │      funcionalidades (must-have / nice-to-have), critérios de aceitação,               │
+  │      restrições técnicas e métricas de sucesso."                                        │
+  │                                                                                          │
+  │   Estrutura recomendada do PRD:                                                          │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │  # PRD — [Nome do Produto/Feature]                                                 │ │
+  │   │                                                                                    │ │
+  │   │  ## 1. Visão e Objetivo                                                            │ │
+  │   │     Qual problema resolve? Para quem? Por que agora?                               │ │
+  │   │                                                                                    │ │
+  │   │  ## 2. Usuários-Alvo (Personas)                                                    │ │
+  │   │     Quem vai usar? Quais são suas necessidades e dores?                            │ │
+  │   │                                                                                    │ │
+  │   │  ## 3. Funcionalidades                                                             │ │
+  │   │     Must-have (MVP): [lista]                                                       │ │
+  │   │     Nice-to-have:    [lista]                                                       │ │
+  │   │     Fora do escopo:  [lista]  ← crítico para evitar scope creep                   │ │
+  │   │                                                                                    │ │
+  │   │  ## 4. Critérios de Aceitação                                                      │ │
+  │   │     Dado [contexto], quando [ação], então [resultado esperado]                    │ │
+  │   │                                                                                    │ │
+  │   │  ## 5. Restrições Técnicas                                                         │ │
+  │   │     Stack, performance, segurança, integrações obrigatórias                       │ │
+  │   │                                                                                    │ │
+  │   │  ## 6. Métricas de Sucesso                                                         │ │
+  │   │     Como saberemos que funcionou? KPIs mensuráveis                                │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                                          │
+  │   FASE 2 — DO PRD PARA O CÓDIGO                                                          │
+  │   ─────────────────────────────────────────────────────────────────────────────────     │
+  │                                                                                          │
+  │   PRD aprovado                                                                           │
+  │        │                                                                                 │
+  │        ▼                                                                                 │
+  │   > "Com base no PRD em prd.md, crie um plano técnico de implementação:                 │
+  │      arquitetura, componentes necessários, ordem de desenvolvimento,                    │
+  │      dependências e estimativa de complexidade por feature."                            │
+  │        │                                                                                 │
+  │        ▼                                                                                 │
+  │   Plano técnico aprovado                                                                 │
+  │        │                                                                                 │
+  │        ▼                                                                                 │
+  │   > "Implemente a Feature X conforme o PRD. Os critérios de aceitação                  │
+  │      estão na seção 4 do prd.md. Escreva testes baseados nesses critérios."            │
+  │        │                                                                                 │
+  │        ▼                                                                                 │
+  │   Agentic loop executa → entrega feature com testes validando os critérios do PRD       │
+  │                                                                                          │
+  │   FASE 3 — PRD COMO FONTE DE VERDADE CONTÍNUA                                           │
+  │   ─────────────────────────────────────────────────────────────────────────────────     │
+  │                                                                                          │
+  │   > "Esta mudança solicitada pelo cliente está dentro do escopo do PRD?"                │
+  │   > "Atualize o PRD para refletir a decisão de remover a feature Y"                    │
+  │   > "Gere os testes de aceitação a partir dos critérios do PRD"                        │
+  │   > "O código implementado cobre todos os must-haves do PRD?"                          │
+  │                                                                                          │
+  │   VANTAGENS DE USAR PRD COM CLAUDE CODE:                                                 │
+  │   • Claude usa o PRD como contexto — menos reexplicação a cada sessão                   │
+  │   • Critérios de aceitação viram testes automaticamente                                  │
+  │   • "Fora do escopo" evita que Claude implemente além do pedido                          │
+  │   • PRD versionado no git = histórico de decisões de produto                             │
+  │   • Alinha time técnico e não-técnico na mesma fonte de verdade                          │
+  │                                                                                          │
+  │   DICA: coloque o caminho do PRD no CLAUDE.md do projeto:                               │
+  │   ┌────────────────────────────────────────────────────────────────────────────────────┐ │
+  │   │  ## Documentos de Referência                                                       │ │
+  │   │  - PRD: docs/prd.md                                                                │ │
+  │   │  - ADRs: docs/decisions/                                                           │ │
+  │   │  - API Spec: docs/openapi.yaml                                                     │ │
+  │   └────────────────────────────────────────────────────────────────────────────────────┘ │
+  │                                                                                          │
+  └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ REFERENCIA RAPIDA — COMANDOS E PROMPTS ESSENCIAIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  INICIAR                        EXPLORAR                       IMPLEMENTAR
+  ───────────────────────        ───────────────────────        ───────────────────────
+  $ claude                       > "Explique a arquitetura"     > "Implemente [feature]"
+  $ claude -p "[tarefa]"         > "Como funciona [módulo]?"   > "Refatore [função]"
+  /help                          > "Quais são as dependências?" > "Escreva testes para X"
+  /fast  (toggle)                > "Mostre o fluxo de [X]"     > "Adicione validação em Y"
+
+  VERIFICAR                      COMMITAR                       REVISAR
+  ───────────────────────        ───────────────────────        ───────────────────────
+  > "Rode os testes"             > "Crie um commit semântico"   > "Revise este código"
+  > "Execute o linter"           > "Qual seria um bom título?"  > "Encontre problemas de"
+  > "Existe regressão?"          > "Adicione ao staging e       > "segurança/performance"
+  > "Build ainda funciona?"        commite os arquivos X e Y"  > "Compare com a PR #42"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Modelo: Claude Opus 4.6  |  CLI: Claude Code  |  Desenvolvido por: Anthropic
+  Documentação: https://docs.anthropic.com/claude-code
+  Data de referência: Fevereiro 2026
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
