@@ -4,19 +4,26 @@ Referência visual em ASCII para engenheiros de software que querem entender e u
 
 ## O que está aqui
 
-### [`claude-code-workflow.md`](./claude-code-workflow.md) — Workflow de Interação
+### [`claude-code-workflow.md`](./claude-code-workflow.md) — Workflow de Engenharia de Software
 
-Guia prático de como estruturar a interação com o Claude Code do prompt até o commit:
+Guia completo de como estruturar a interação com o Claude Code do setup até o merge:
 
 | Etapa | Descrição |
 |---|---|
-| 1. Prompt | Como escrever contexto claro e eficiente |
-| 2. Plan Mode | Exploração e alinhamento antes de codar |
-| 3. PRD / Spec | Documento de requisitos validado |
-| 4. Ação | Execução controlada com revisão por etapa |
-| 5. Revisão | Testes, diff, commit |
+| 0. Setup | CLAUDE.md + exploração do codebase antes de qualquer coisa |
+| 1. Prompt | Templates por tipo de tarefa com contexto claro e escopo explícito |
+| 2. Plan Mode | Arquitetura e abordagem antes de codar (Opus) |
+| 3. PRD / Spec | Requisitos como contrato: escopo, critérios de aceite, casos de borda |
+| 4. Branch | Isolamento desde o início, convenções de nomenclatura |
+| 5. Testes | Estratégia antes da implementação, TDD, cobertura mínima por tipo |
+| 6. Ação | Execução controlada, gerenciamento de contexto, uso de subagents |
+| 7. Debugging | Diagnóstico sistemático: reproduzir → hipótese → confirmar → corrigir → prevenir |
+| 8. Iteração | Feedback loop controlado, quando regredir ao plan mode |
+| 9. Code Review | Checklist de segurança e qualidade, review com Opus |
+| 10. CI/CD | Pipeline como gate obrigatório antes do merge |
+| 11. Merge | PR, rebase, documentação, fechamento do ciclo |
 
-Inclui guia de **quando usar Opus vs Sonnet** (plan mode vs execução), templates de prompt por tipo de tarefa e tabela de risco por tipo de ação.
+Inclui guia detalhado de **quando usar Opus vs Sonnet** em cada etapa e 12 regras de ouro.
 
 ---
 
