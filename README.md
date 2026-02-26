@@ -6,24 +6,20 @@ Referência visual em ASCII para engenheiros de software que querem entender e u
 
 ### [`claude-code-workflow.md`](./claude-code-workflow.md) — Workflow de Engenharia de Software
 
-Guia completo de como estruturar a interação com o Claude Code do setup até o merge:
+Guia completo estruturado em **três modos de operação**:
 
-| Etapa | Descrição |
+| Modo | Quando usar |
 |---|---|
-| 0. Setup | CLAUDE.md + exploração do codebase antes de qualquer coisa |
-| 1. Prompt | Templates por tipo de tarefa com contexto claro e escopo explícito |
-| 2. Plan Mode | Arquitetura e abordagem antes de codar (Opus) |
-| 3. PRD / Spec | Requisitos como contrato: escopo, critérios de aceite, casos de borda |
-| 4. Branch | Isolamento desde o início, convenções de nomenclatura |
-| 5. Testes | Estratégia antes da implementação, TDD, cobertura mínima por tipo |
-| 6. Ação | Execução controlada, gerenciamento de contexto, uso de subagents |
-| 7. Debugging | Diagnóstico sistemático: reproduzir → hipótese → confirmar → corrigir → prevenir |
-| 8. Iteração | Feedback loop controlado, quando regredir ao plan mode |
-| 9. Code Review | Checklist de segurança e qualidade, review com Opus |
-| 10. CI/CD | Pipeline como gate obrigatório antes do merge |
-| 11. Merge | PR, rebase, documentação, fechamento do ciclo |
+| **Interativo** | Exploração, alto risco, task ambígua — você aprova cada passo |
+| **Skills** | Etapas repetíveis automatizadas: `/prd`, `/debug`, `/security-review`, `/pre-merge`, `/review-feature` |
+| **Agentic Loop** | Tasks longas e bem definidas — Claude itera autonomamente até os critérios de aceite serem satisfeitos |
 
-Inclui guia detalhado de **quando usar Opus vs Sonnet** em cada etapa e 12 regras de ouro.
+Inclui:
+- Fluxo de decisão para escolher o modo certo
+- Templates de skills prontos para criar em `.claude/commands/`
+- Como estruturar prompts para o agentic loop (objetivo + critérios verificáveis + restrições)
+- Guia de **Opus vs Sonnet** por etapa
+- 12 regras de ouro
 
 ---
 
