@@ -4,7 +4,25 @@ Referência visual em ASCII para engenheiros de software que querem entender e u
 
 ## O que está aqui
 
-O arquivo [`claude_code_guia.txt`](./claude_code_guia.txt) cobre em formato de diagrama:
+### [`claude-code-workflow.md`](./claude-code-workflow.md) — Workflow de Interação
+
+Guia prático de como estruturar a interação com o Claude Code do prompt até o commit:
+
+| Etapa | Descrição |
+|---|---|
+| 1. Prompt | Como escrever contexto claro e eficiente |
+| 2. Plan Mode | Exploração e alinhamento antes de codar |
+| 3. PRD / Spec | Documento de requisitos validado |
+| 4. Ação | Execução controlada com revisão por etapa |
+| 5. Revisão | Testes, diff, commit |
+
+Inclui guia de **quando usar Opus vs Sonnet** (plan mode vs execução), templates de prompt por tipo de tarefa e tabela de risco por tipo de ação.
+
+---
+
+### [`claude_code_guia.txt`](./claude_code_guia.txt) — Guia Completo de Capacidades
+
+Referência visual em ASCII que cobre em formato de diagrama:
 
 | Seção | Conteúdo |
 |---|---|
