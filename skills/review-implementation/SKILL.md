@@ -33,10 +33,38 @@ Do this in one pass — you will need these facts to classify findings correctly
 
 ---
 
-## Phase 1 — Read the Spec
+## Phase 1 — Review the Plan
 
-Read every section of the spec document carefully. For each described behaviour,
-feature, or fix, create a mental checklist item. Pay attention to:
+Before using the spec as ground truth, validate it. Specs go stale — they may
+have been written before implementation started, or edited mid-sprint without
+keeping up with the code.
+
+Read the spec and flag any of the following:
+
+| Issue | What to look for |
+|---|---|
+| **Already implemented** | Items described as "to do" that already exist in the code |
+| **Stale references** | Version numbers, file paths, function names, or column names that don't match the current codebase |
+| **Convention violations** | Instructions that contradict the project's own rules (e.g., wrong migration number, wrong error envelope shape) |
+| **Contradictions** | Two sections of the spec that disagree with each other |
+| **Ambiguity** | Requirements so vague they can't be verified ("improve performance", "handle errors better") |
+
+Produce a brief **spec health verdict** before moving on:
+
+- ✅ **Spec is clean** — proceed treating it as ground truth.
+- ⚠️ **Spec has N stale/incorrect items** — list them, then treat the *code* as
+  source of truth for those specific items and the spec as source of truth for
+  the rest.
+
+This verdict matters: a stale spec will cause you to file false bugs for things
+the code already does correctly.
+
+---
+
+## Phase 2 — Read the Spec (build your checklist)
+
+With a validated spec in hand, read every section carefully. For each described
+behaviour, feature, or fix, create a mental checklist item. Pay attention to:
 
 - **Exact field names and types** mentioned in the spec.
 - **API endpoints and HTTP verbs** that should exist.
@@ -46,11 +74,13 @@ feature, or fix, create a mental checklist item. Pay attention to:
 - **Cross-cutting wiring**: a feature is only complete when *all layers* that
   touch it are implemented (DB → backend → API → frontend types → UI).
 
+Skip any items you already flagged as stale in Phase 1.
+
 ---
 
-## Phase 2 — Audit the Code
+## Phase 3 — Audit the Code
 
-For every checklist item from Phase 1, locate the relevant code and verify:
+For every checklist item from Phase 2, locate the relevant code and verify:
 
 - Does the code exist at all?
 - If it exists, does it match the spec (field names, logic, edge cases)?
@@ -73,7 +103,7 @@ These catch whole classes of bugs that single-file reviews miss:
 
 ---
 
-## Phase 3 — Classify Every Finding
+## Phase 4 — Classify Every Finding
 
 Use exactly these three categories:
 
@@ -106,7 +136,7 @@ adds.
 
 ---
 
-## Phase 4 — Produce the Output
+## Phase 5 — Produce the Output
 
 ### If the user wants a verbal summary
 
@@ -166,7 +196,7 @@ structure:
 
 ---
 
-## Phase 5 — Verify Your Own Findings
+## Phase 6 — Verify Your Own Findings
 
 Before delivering output, re-read each finding and ask:
 
