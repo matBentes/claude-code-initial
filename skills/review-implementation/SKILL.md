@@ -1,18 +1,4 @@
----
-name: review-implementation
-description: >
-  Systematically reviews a codebase against a spec or task document, classifying
-  every gap as a Bug (broken now), Minor (defensive concern), or Missing Feature
-  (not built yet), and generates an actionable task doc for an agent to fix.
-  Use this skill whenever the user says "review the implementation", "check if
-  the spec was implemented", "compare code vs tasks", "did the agent implement
-  everything?", or similar. Also trigger it when the user shares a .md tasks file
-  and asks whether the code matches it. This skill is proactive — if the user has
-  just received a PR or finished a feature sprint, suggest running it even if they
-  didn't ask explicitly.
----
-
-# Implementation Review Skill
+# Implementation Review Skill (Updated)
 
 You are performing a **spec-vs-code review**. Your job is to read the spec (PRD,
 tasks doc, issue, or any written plan) and then audit the actual code, classifying
@@ -28,8 +14,15 @@ Before touching any file, understand the project structure:
 2. Identify the tech stack (languages, frameworks, migration tool, test runner).
 3. Note any conventions that affect correctness (e.g., Flyway versioning rules,
    active-record vs repository pattern, JWT role names, API error envelope shape).
+4. **Always open these foundational files regardless of what the feature touches:**
+   - Every migration file — FK constraints, cascade behavior, missing indexes
+   - The app config file (`application.properties`, `.env`, `config.yml`) — JWT
+     settings, secret defaults, feature flags
+   - The auth resource + token builder — expiry, claims, role encoding
+   - The seed / demo data initializer — dangerous defaults, known credentials
 
 Do this in one pass — you will need these facts to classify findings correctly.
+Skipping foundational files is the most common source of missed architectural bugs.
 
 ---
 
@@ -98,8 +91,59 @@ These catch whole classes of bugs that single-file reviews miss:
 | **Migration ordering** | New migrations don't use already-taken version numbers |
 | **Config injection** | Framework config properties (e.g., `@ConfigProperty`) will fail at startup if the env var is missing — flag as a bug if no default is provided in production paths |
 | **Null / Optional safety** | Nullable fields are handled before being dereferenced |
-| **Error envelopes** | Error responses follow the project's documented shape |
+| **Error envelopes** | Error responses follow the project's documented shape consistently across ALL resources |
 | **Auth guards** | Authenticated routes actually check roles, not just the presence of a token |
+
+---
+
+## Phase 3b — Production Readiness Audit
+
+Run this phase on every review, even if the feature being reviewed doesn't
+touch these areas. Architectural bugs are invisible when you only read the
+files the feature changed.
+
+### Data integrity
+
+| Check | What to look for |
+|---|---|
+| **FK cascade behavior** | `ON DELETE CASCADE` on FKs destroys child rows when the parent is deleted. Ask: *is that the right business rule?* For community data (reviews, posts) owned by one user but contributed by others, `RESTRICT` or `SET NULL` is usually correct. `CASCADE` is only right when children are truly owned by the parent. |
+| **Orphan risk** | Can a delete leave rows with broken references? Is every FK either constrained or nullable? |
+| **Aggregate consistency** | Denormalized counters / aggregates (e.g., `avg_rating`, `review_count`) — are they updated on every write path that changes the source data? Insert, update, and delete. |
+| **Migration backfill safety** | Does a new `NOT NULL` column have a safe default for existing rows? A `DEFAULT '$$'` for a column that represents user intent backfills with fabricated data. |
+
+### Authentication and authorization
+
+| Check | What to look for |
+|---|---|
+| **Token expiry** | Does the token builder set an explicit `expiresAt`/`lifespan`? If not, tokens may never expire. Confirm via the framework's default behavior. |
+| **Unguarded type parses on JWT claims** | `Long.parseLong(jwt.getSubject())`, `Integer.parseInt(claims.get("id"))` — these throw uncaught exceptions if the claim is missing or malformed. Wrap with try-catch and return 401. |
+| **Role stored outside the token** | If the frontend stores `role` in localStorage separately from the token, it can be stale after a server-side role change. The role should be derived from the live token claim at hydration time. |
+| **Rate limiting** | Auth endpoints (login, register, password reset) with no throttling are trivially brute-forceable. Flag if no reverse-proxy or application-layer rate limit exists. |
+| **Dangerous seed defaults** | Demo users with known passwords seeded at startup — is seeding gated behind an env var? Is that var `false` by default in production? |
+
+### Scalability and performance
+
+| Check | What to look for |
+|---|---|
+| **Unbounded list endpoints** | Any `GET /collection` endpoint that returns all rows with no `LIMIT` or pagination params. One large result set can OOM the server or time out the client. |
+| **Missing indexes** | For every column used in a `WHERE` clause or `ORDER BY`, confirm there is an index. Pay special attention to JSONB operators (`@>`, `->>`) which need GIN indexes, not B-tree. |
+| **N+1 query patterns** | `FetchType.LAZY` associations accessed inside a loop (or a `.map()` over a result list) fire one SQL query per row. Verify that list endpoints use fetch joins or eager loading for associations accessed during serialization. |
+| **In-memory filtering of large result sets** | Fetching all rows into the application layer before filtering (e.g., `openNow` filter) works at small scale but fails at production volume. Flag if the filtered set is unbounded. |
+
+### Resilience and error handling
+
+| Check | What to look for |
+|---|---|
+| **Check-then-act race conditions** | Read-then-write sequences (count + insert, find + persist) are not atomic. Concurrent requests can both pass the guard and collide at the DB constraint. The DB constraint is the real guard — the application must catch the constraint exception and return the appropriate HTTP status instead of a 500. |
+| **Missing React Error Boundaries** | A runtime exception in any React component without an enclosing error boundary crashes the entire page. Every route-level component should have an error boundary. |
+| **Input that produces invalid internal state** | E.g., a name field that, after normalization, produces an empty slug. The invalid state should be rejected at the boundary (validation layer) rather than failing deep inside a service. |
+
+### Documentation and configuration drift
+
+| Check | What to look for |
+|---|---|
+| **CLAUDE.md / README env var table** | Does every env var in the config file have a matching entry in the docs? Are documented defaults accurate? A mismatch means operators will misconfigure production. |
+| **Commented-out migration gaps** | Missing version numbers in Flyway (V6, V7 absent when V5 and V8 exist) — are they intentional? Add a comment in the next migration or README if so, to prevent future confusion. |
 
 ---
 
@@ -114,6 +158,11 @@ error that a user would encounter.
 
 **Examples:** null pointer on a field that is sometimes absent, wrong SQL operator,
 encoding bug in a string comparison, missing null-check before `.get()`.
+
+Production readiness bugs (from Phase 3b) that qualify as 🔴:
+- `ON DELETE CASCADE` that destroys community-owned data
+- JWT tokens with no expiry
+- Unbounded list endpoint on a table that will grow
 
 ### 🟡 Minor — Defensive concern
 The code works today but is fragile, inconsistent, or likely to break as the
@@ -208,6 +257,10 @@ Before delivering output, re-read each finding and ask:
    that will definitely fire is a bug.
 4. **Is the fix I'm suggesting actually correct for this project's conventions?**
    (e.g., Flyway versioning, active-record pattern, JWT role strings)
+5. **For Phase 3b findings: did I apply domain judgment, not just pattern
+   matching?** `ON DELETE CASCADE` is not always wrong — it depends on whether
+   the child data belongs to the parent or to the community. Read the entity
+   relationships and the business context before filing a data integrity bug.
 
 Correct any errors you find. It is better to under-report than to send an agent
 on a wild-goose chase fixing non-issues.
@@ -230,14 +283,14 @@ on a wild-goose chase fixing non-issues.
 - **Test mocks that lie:** If tests mock a hook or API and the mock doesn't
   match the real contract, the tests pass but the app can still be broken. Flag
   this as a Minor.
-
----
-
-## Output Tone
-
-- Be direct and specific. Vague findings ("this could be improved") are useless
-  to an agent.
-- Quote file paths and function names exactly as they appear in the code.
-- For bugs, explain the failure mode — what the user would actually see go wrong.
-- For missing features, give enough implementation detail that an agent can act
-  without needing to re-read the entire spec.
+- **Cascade delete and domain ownership:** `ON DELETE CASCADE` on a FK means
+  "this child data is owned by the parent." If child data is instead
+  *community-contributed* (reviews written by many users for one restaurant),
+  cascade-deleting it when the restaurant owner leaves destroys other users'
+  work. This requires domain judgment — the pattern match alone (`ON DELETE
+  CASCADE` exists) is not enough to call it a bug.
+- **Emergent bugs need multiple files:** Some bugs are only visible when two or
+  more files are read together (JWT expiry requires auth resource + config file;
+  cascade delete requires migration + entity + business domain). If Phase 3b
+  findings seem thin, you probably didn't open the foundational files listed in
+  Phase 0. Go back and open them.
