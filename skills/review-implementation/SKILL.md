@@ -5,7 +5,7 @@
 > It does **NOT** edit any file, apply any fix, or write any code.
 > Output is always a verbal report or a `docs/tasks-*.md` task document for an agent to act on later.
 > If you feel the urge to fix something while running this skill — write it as a finding instead.
-> To apply fixes, use the companion skill: `skills/apply-fixes/SKILL.md`
+> To apply fixes, use the companion skill: `skills/implementer/SKILL.md`
 
 ---
 
